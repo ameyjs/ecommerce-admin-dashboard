@@ -2,6 +2,8 @@ import { getOrderById } from '@/app/actions/order';
 import { notFound } from 'next/navigation';
 import OrderDetailsClient from '@/components/OrderDetailsClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function OrderDetailsPage({
   params
 }: {

@@ -1,6 +1,9 @@
 import { getOrders } from '@/app/actions/order';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import OrdersClient from '@/components/OrdersClient';
+
+export const dynamic = 'force-dynamic';
 
 export default async function OrdersPage({
   searchParams
@@ -19,11 +22,13 @@ export default async function OrdersPage({
         <p className="text-gray-600">View and manage all customer orders</p>
       </div>
 
-      <OrdersClient
-        initialOrders={orders}
-        pagination={pagination}
-        initialSearch={search}
-      />
+      <Suspense fallback={<div className="text-center py-8">Loading orders...</div>}>
+        <OrdersClient
+          initialOrders={orders}
+          pagination={pagination}
+          initialSearch={search}
+        />
+      </Suspense>
     </div>
   );
 }

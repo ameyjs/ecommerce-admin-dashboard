@@ -4,6 +4,8 @@ import { getAnalyticsData } from "@/app/actions/analytics";
 import { getProducts } from "@/app/actions/product";
 import ProductsClient from "@/components/ProductsClient";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage({
   searchParams
 }: {

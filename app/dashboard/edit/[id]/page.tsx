@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getProduct } from "@/app/actions/product";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }

@@ -2,6 +2,8 @@ import { getCustomerDetails } from '@/app/actions/customer';
 import { notFound } from 'next/navigation';
 import CustomerDetailsClient from '@/components/CustomerDetailsClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CustomerDetailsPage({
   params
 }: {
