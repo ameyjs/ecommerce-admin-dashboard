@@ -68,8 +68,20 @@ export async function updateProduct(productId: string, formData: FormData, image
 export async function deleteProduct(productId: string) {
   try {
     await connectDB();
+
+    // Import Order model dynamically to avoid circular dependencies
+    const Order = (await import("@/models/Order")).default;
+
+    // Delete all orders that contain this product
+    await Order.deleteMany({ "items.productId": productId });
+
+    // Delete the product itself
     await Product.findByIdAndDelete(productId);
+
+    // Revalidate all relevant paths to update stats and graphs
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/orders");
+
     return { success: true };
   } catch (error) {
     return { error: "Failed to delete product" };
