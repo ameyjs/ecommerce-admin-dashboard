@@ -9,10 +9,11 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage({
   searchParams
 }: {
-  searchParams: { page?: string; search?: string };
+  searchParams: Promise<{ page?: string; search?: string }>;
 }) {
-  const page = Number(searchParams.page) || 1;
-  const search = searchParams.search || '';
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const search = params.search || '';
 
   const [{ products, pagination }, analyticsData] = await Promise.all([
     getProducts(page, 10, search),

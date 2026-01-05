@@ -8,21 +8,30 @@ export async function getOrders(page: number = 1, limit: number = 10, search: st
   try {
     await connectDB();
 
-    const skip = (page - 1) * limit;
-    const searchQuery = search
-      ? {
-          $or: [
-            { orderNumber: { $regex: search, $options: 'i' } },
-            { customerEmail: { $regex: search, $options: 'i' } }
-          ]
-        }
-      : {};
+    let searchQuery: any = {};
+    const trimmedSearch = search.trim();
+
+    if (trimmedSearch) {
+      // Check if search looks like an email (contains @)
+      if (trimmedSearch.includes('@')) {
+        // Search by customer email - return all orders for that customer
+        searchQuery = { customerEmail: trimmedSearch.toLowerCase() };
+      } else {
+        // Search by order number - exact match only
+        searchQuery = { orderNumber: trimmedSearch };
+      }
+    }
+
+    // For single order search, skip pagination
+    const isOrderNumberSearch = trimmedSearch && !trimmedSearch.includes('@');
+    const skip = isOrderNumberSearch ? 0 : (page - 1) * limit;
+    const actualLimit = isOrderNumberSearch ? 1 : limit;
 
     const [orders, total] = await Promise.all([
       Order.find(searchQuery)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit)
+        .limit(actualLimit)
         .populate('items.productId')
         .lean(),
       Order.countDocuments(searchQuery)
@@ -33,7 +42,7 @@ export async function getOrders(page: number = 1, limit: number = 10, search: st
       orders: JSON.parse(JSON.stringify(orders)),
       pagination: {
         currentPage: page,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / (isOrderNumberSearch ? 1 : limit)),
         totalOrders: total,
         hasMore: skip + orders.length < total
       }

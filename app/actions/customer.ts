@@ -7,14 +7,16 @@ export async function getCustomers(page: number = 1, limit: number = 10, search:
   try {
     await connectDB();
 
-    const skip = (page - 1) * limit;
-    const searchQuery = search
-      ? { customerEmail: { $regex: search, $options: 'i' } }
+    const trimmedSearch = search.trim().toLowerCase();
+
+    // For customer search, use exact email match
+    const searchQuery = trimmedSearch
+      ? { customerEmail: trimmedSearch }
       : {};
 
     // Get unique customer emails with order aggregation
     const customers = await Order.aggregate([
-      ...(search ? [{ $match: searchQuery }] : []),
+      ...(trimmedSearch ? [{ $match: searchQuery }] : []),
       {
         $group: {
           _id: '$customerEmail',
@@ -37,17 +39,19 @@ export async function getCustomers(page: number = 1, limit: number = 10, search:
       }
     ]);
 
+    // For search, don't paginate (return the single result)
     const total = customers.length;
-    const paginatedCustomers = customers.slice(skip, skip + limit);
+    const skip = trimmedSearch ? 0 : (page - 1) * limit;
+    const paginatedCustomers = trimmedSearch ? customers : customers.slice(skip, skip + limit);
 
     return {
       success: true,
       customers: JSON.parse(JSON.stringify(paginatedCustomers)),
       pagination: {
         currentPage: page,
-        totalPages: Math.ceil(total / limit),
+        totalPages: trimmedSearch ? 1 : Math.ceil(total / limit),
         totalCustomers: total,
-        hasMore: skip + paginatedCustomers.length < total
+        hasMore: !trimmedSearch && (skip + paginatedCustomers.length < total)
       }
     };
   } catch (error) {

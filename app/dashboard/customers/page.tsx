@@ -2,14 +2,16 @@ import { getCustomers } from '@/app/actions/customer';
 import CustomersClient from '@/components/CustomersClient';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function CustomersPage({
   searchParams
 }: {
-  searchParams: { page?: string; search?: string };
+  searchParams: Promise<{ page?: string; search?: string }>;
 }) {
-  const page = Number(searchParams.page) || 1;
-  const search = searchParams.search || '';
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const search = params.search || '';
 
   const { customers, pagination } = await getCustomers(page, 10, search);
 
