@@ -2,6 +2,8 @@
 
 A modern, full-stack e-commerce dashboard built with Next.js 15, MongoDB, and NextAuth.js.
 
+# Live link  : https://ecommerce-admin-dashboard-spyc.vercel.app/
+
 ## Features
 
 - **Authentication**: Secure admin login with NextAuth.js
